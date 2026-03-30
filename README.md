@@ -6,37 +6,37 @@
 Precision oncology requires integrated molecular profiling for accurate tumor classification and risk stratification. Current machine learning models often address these tasks separately, limiting their clinical utility.
 
 ### Model Introduction
-**Deep-CANClassSurv** is a deep learning multi-task framework that simultaneously:
+**Deep-CANClassSurv** is an **attention-based two-stage deep learning framework with representation transfer learning** that:
 - Integrates **multi-omics data**
-- Classifies **38 tumor types** 
+- Classifies **38 tumor types**
 - Stratifies **survival risk**
 
 | Feature | Description |
 |---------|-------------|
-| **Multi-task Architecture** | Joint classification + survival analysis |
+| **Two-stage Framework** | Decoupled classification and survival modeling via representation transfer |
 | **Attention Mechanism** | Multi-head self-attention modules |
-| **Interpretability** | SHAP analysis for feature importance |
+| **Interpretability** | SHAP analysis and embedding-based clustering |
 | **Class Imbalance Handling** | Focal Loss implementation |
 
 #### Two-stage Strategy
 
 **Stage 1: Tumor Classification**
-- Based on FT-Transformer with protein-protein interactions and protein‐sequence embeddings; Outputs a 512-dimensional representation
-- The MSK-IMPACT dataset was split into 37,000 samples for model training and 6,971 for independent testing (AACR Project GENIE v14.0)
-- Performance: 88.3% average accuracy (38 tumor types)
+- Based on FT-Transformer with protein-protein interactions and protein-sequence embeddings; outputs a 512-dimensional representation
+- The MSK-IMPACT dataset included **43,971** samples from AACR Project GENIE v14.0, with **37,000** samples for model training and **6,971** for validation
+- Performance: **0.883** classification accuracy across 38 tumor types
 
 **Stage 2: Survival Risk Stratification**
-- The MSK-CHORD 2024 cohort with overall survival follow-up data was separated into 13,225 samples for model training and 3,153 for independent validation
-- Features undergo variance filtering (threshold 0.001), correlation filtering (|r|>0.95) with OS time/status, and Z-score normalization  
+- The MSK-CHORD 2024 cohort with overall survival follow-up data included **16,378** overlapping patients from five major cancers, separated into **13,225** samples for model training and **3,153** for validation
+- The transferred 512-dimensional embeddings undergo variance filtering (**threshold 0.001**), pairwise Pearson correlation filtering (**|r| > 0.95**), and Z-score normalization
 - Model: Cox proportional hazards
-- Performance: C-index 0.74, significant risk stratification (log-rank p < 0.01), Kaplan-Meier curves clear separation between high- and low-risk groups
+- Performance: **C-index 0.74**, significant risk stratification (**log-rank p < 0.001**), with clear separation between high- and low-risk groups
 
 ## Overview
 <div align=center>
 <img src="https://github.com/yyj971117/Deep-CANClassSurv/blob/main/Overview.png" height="800"  width="1000">
 </div>
 
-**Figure 1. Schematic overview of the Deep-CANClassSurv model workflow for multi-omics tumor analysis.** 
+**Figure 1. Overview of the Deep-CANClassSurv framework.** After preprocessing, feature selection, and multi-head self-attention-based representation learning, the model performs **(1) pan-cancer classification** and **(2) survival risk stratification**, together with interpretability analyses.
 
 1. **Data processing and feature selection**  
    - Binary mutation/indel, CNV focal & arm-level calls, MSI-sensor, mutational signatures  
@@ -48,16 +48,17 @@ Precision oncology requires integrated molecular profiling for accurate tumor cl
 2. **Model Architecture**  
    - **FT-Transformer** backbone with multi-head self-attention modules, followed by feed-forward neural network components, Squeeze-and-Excitation and residual normalization
    - **Focal Loss** to handle class imbalance
-   - Softmax outputs over 38 classes  
+   - Softmax outputs over 38 classes
+   - Generates a **512-dimensional patient embedding** for downstream prognosis modeling
 
 3. **Survival Analysis**  
-   - Variance & correlation filtering, Z-score scaling  
-   - **Cox Proportional Hazards** model  
-   - Kaplan–Meier stratification and log-rank tests  
+   - Transferred embeddings undergo variance filtering, correlation filtering, and Z-score normalization
+   - **Cox Proportional Hazards** model
+   - Kaplan–Meier stratification and log-rank tests
 
 4. **Interpretability**  
-   - **Kernel SHAP** for global and per-cancer feature importance  
-
+   - **SHAP attribution** for prognostic feature interpretation
+   - **Embedding-based clustering** for latent molecular structure analysis
 ---
 
 ## System Requirements
